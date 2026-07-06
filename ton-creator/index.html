@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TON Token Creator - Jetton 发币</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #07070a;
+      color: #e8e8f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    ::selection { background: rgba(0, 136, 204, 0.3); }
+    .bg-glow {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(0,136,204,0.08) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 40% at 80% 80%, rgba(0,200,255,0.06) 0%, transparent 60%);
+    }
+    .container { max-width: 640px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    /* Header */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; max-width: 640px; margin: 0 auto;
+    }
+    .logo {
+      font-size: 20px; font-weight: 800;
+      background: linear-gradient(135deg, #0099cc, #00ccff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .network-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      background: rgba(34, 197, 94, 0.1); color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .network-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: #22c55e; display: inline-block;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 20px; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s ease; font-family: inherit;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-accent {
+      background: linear-gradient(135deg, #0099cc, #0088bb);
+      color: #fff; box-shadow: 0 0 24px rgba(0,136,204,0.2);
+    }
+    .btn-accent:hover { box-shadow: 0 0 32px rgba(0,136,204,0.35); transform: translateY(-1px); }
+    .btn-accent:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-ghost {
+      background: rgba(255,255,255,0.06); color: #a0a0b8;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #e8e8f0; }
+
+    /* Wallet Info */
+    .wallet-info {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; margin-bottom: 20px;
+      background: rgba(0,136,204,0.06); border: 1px solid rgba(0,136,204,0.15);
+      border-radius: 14px;
+    }
+    .wallet-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; color: #fff; flex-shrink: 0;
+      background: #0099cc;
+    }
+    .wallet-details { flex: 1; min-width: 0; }
+    .wallet-name { font-size: 13px; font-weight: 600; color: #e8e8f0; }
+    .wallet-addr {
+      font-size: 12px; font-family: 'SF Mono', 'Consolas', monospace;
+      color: #8888a0; display: block; margin-top: 1px;
+    }
+    .wallet-balance { font-size: 12px; color: #22c55e; font-weight: 500; margin-left: auto; }
+
+    /* Cards */
+    .card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px; padding: 24px; margin-bottom: 16px;
+      backdrop-filter: blur(4px);
+    }
+    .card-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 15px; font-weight: 700; color: #c8c8e0; margin-bottom: 20px;
+    }
+    .card-step {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 8px;
+      background: linear-gradient(135deg, #0099cc, #0088bb);
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 18px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 500;
+      color: #9898b0; margin-bottom: 6px;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 12px 14px;
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px; color: #e8e8f0; font-size: 14px;
+      font-family: inherit; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: rgba(0,136,204,0.4);
+      box-shadow: 0 0 0 3px rgba(0,136,204,0.08);
+    }
+    .form-group input::placeholder, .form-group textarea::placeholder { color: #555570; }
+    .form-group textarea { min-height: 72px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* File Upload */
+    .upload-area {
+      position: relative; border: 1.5px dashed rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 20px 16px;
+      text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .upload-area:hover { border-color: rgba(0,136,204,0.3); background: rgba(0,136,204,0.03); }
+    .upload-area.has-file { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.03); }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2;
+    }
+    .upload-icon {
+      width: 40px; height: 40px; margin: 0 auto 8px;
+      background: rgba(0,136,204,0.1); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .upload-icon svg { width: 20px; height: 20px; color: #0099cc; }
+    .upload-text { font-size: 14px; font-weight: 500; color: #a0a0b8; }
+    .upload-hint { display: block; font-size: 12px; color: #555570; margin-top: 4px; }
+    .upload-preview {
+      display: none; width: 64px; height: 64px; border-radius: 12px;
+      object-fit: cover; margin: 0 auto 6px; border: 2px solid rgba(34,197,94,0.2);
+    }
+    .upload-area.has-file .upload-preview { display: block; }
+    .upload-area.has-file .upload-icon { display: none; }
+    .upload-area.has-file .upload-hint { display: none; }
+
+    /* Toggle Switches */
+    .toggle-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 0; cursor: pointer; user-select: none;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-row:first-child { padding-top: 0; }
+    .toggle-info { flex: 1; min-width: 0; }
+    .toggle-title { font-size: 14px; font-weight: 600; color: #c8c8e0; }
+    .toggle-desc { display: block; font-size: 12px; color: #686880; margin-top: 2px; line-height: 1.4; }
+    .toggle-switch {
+      position: relative; width: 44px; height: 26px; flex-shrink: 0;
+    }
+    .toggle-switch input {
+      position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;
+    }
+    .toggle-track {
+      position: absolute; inset: 0; border-radius: 13px;
+      background: rgba(255,255,255,0.08); transition: background 0.25s;
+    }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+      border-radius: 50%; background: #555570;
+      transition: transform 0.25s, background 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .toggle-switch input:checked ~ .toggle-track { background: rgba(0,136,204,0.4); }
+    .toggle-switch input:checked ~ .toggle-thumb {
+      transform: translateX(18px); background: #0099cc;
+    }
+
+    /* Create Button */
+    .btn-create {
+      width: 100%; padding: 16px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, #0099cc, #0088bb);
+      color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
+      font-family: inherit; letter-spacing: 0.3px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 24px rgba(0,136,204,0.2);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-bottom: 20px;
+    }
+    .btn-create:hover:not(:disabled) {
+      box-shadow: 0 6px 32px rgba(0,136,204,0.35);
+      transform: translateY(-2px);
+    }
+    .btn-create:active:not(:disabled) { transform: translateY(0); }
+    .btn-create:disabled {
+      opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none;
+    }
+    .btn-create .spinner {
+      display: none; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    .btn-create.loading .spinner { display: inline-block; }
+    .btn-create.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Step Indicator */
+    .step-indicator {
+      list-style: none; display: flex; justify-content: center; gap: 8px;
+      margin: 0 0 12px; padding: 0;
+    }
+    .step-indicator li {
+      font-size: 11px; font-weight: 600; color: #555570;
+      padding: 4px 12px; border-radius: 20px;
+      background: rgba(255,255,255,0.03);
+      transition: all 0.3s ease;
+    }
+    .step-indicator li.active { color: #00bbee; background: rgba(0,136,204,0.12); }
+    .step-indicator li.done { color: #22c55e; background: rgba(34,197,94,0.1); }
+
+    .progress-text {
+      text-align: center; font-size: 14px; color: #00bbee;
+      margin-bottom: 16px; min-height: 22px; font-weight: 500;
+    }
+    .progress-text.done { color: #22c55e; }
+    .progress-text.error { color: #ef4444; }
+    .create-note {
+      text-align: center; font-size: 12px; color: #555570; margin-bottom: 20px; line-height: 1.5;
+    }
+    .create-note strong { color: #0099cc; font-weight: 500; }
+
+    /* Result */
+    .result-card {
+      display: none; margin-top: 16px;
+      background: linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02));
+      border: 1px solid rgba(34,197,94,0.15); border-radius: 16px; padding: 24px;
+    }
+    .result-card h3 {
+      font-size: 18px; font-weight: 700; color: #22c55e; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .result-table { width: 100%; margin-bottom: 16px; }
+    .result-table td { padding: 6px 8px; font-size: 13px; vertical-align: top; }
+    .result-table td:first-child { color: #686880; width: 80px; white-space: nowrap; }
+    .result-table td:last-child { word-break: break-all; color: #c8c8e0; font-weight: 500; }
+    .result-addr { font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; color: #0099cc; }
+    .result-table a { color: #0099cc; font-size: 13px; text-decoration: none; }
+    .result-table a:hover { text-decoration: underline; }
+    .result-json {
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px; padding: 12px; font-size: 11px; font-family: 'SF Mono', 'Consolas', monospace;
+      overflow-x: auto; color: #8888a0; margin-top: 12px; white-space: pre;
+    }
+
+    /* Wallet Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #0d0d18; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 24px; width: 100%; max-width: 380px;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+    }
+    .modal-header span { font-size: 17px; font-weight: 700; color: #e8e8f0; }
+    .modal-close {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border: none; background: rgba(255,255,255,0.06); border-radius: 8px;
+      color: #686880; font-size: 18px; cursor: pointer; transition: background 0.2s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.1); color: #e8e8f0; }
+    .wallet-option {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; width: 100%; border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02); border-radius: 12px;
+      color: #e8e8f0; font-size: 15px; font-weight: 500; cursor: pointer;
+      font-family: inherit; transition: all 0.2s; margin-bottom: 8px;
+    }
+    .wallet-option:last-child { margin-bottom: 0; }
+    .wallet-option:hover { border-color: rgba(0,136,204,0.25); background: rgba(0,136,204,0.04); }
+    .wallet-option .w-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .wallet-option .w-tag {
+      margin-left: auto; font-size: 11px; padding: 3px 8px;
+      border-radius: 6px; background: rgba(255,255,255,0.04); color: #555570;
+    }
+    .no-wallet-msg {
+      text-align: center; padding: 20px; color: #686880; font-size: 14px;
+    }
+    .wallet-list-container {
+      max-height: 420px; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent;
+    }
+    .wallet-list-container::-webkit-scrollbar { width: 4px; }
+    .wallet-list-container::-webkit-scrollbar-track { background: transparent; }
+    .wallet-list-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+    .modal-divider {
+      text-align: center; font-size: 11px; color: #555570;
+      padding: 12px 0 8px; margin-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .footer { text-align: center; font-size: 12px; color: #383840; padding: 24px 0; }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 12px 20px; border-radius: 12px;
+      font-size: 13px; color: #e8e8f0;
+      display: none; z-index: 100;
+    }
+    .toast.show { display: flex; align-items: center; gap: 8px; }
+    .toast.success { border-color: rgba(34,197,94,0.3); }
+    .toast.error { border-color: rgba(239,68,68,0.3); }
+
+    @media (max-width: 600px) {
+      .container { padding: 16px 12px 40px; }
+      header { padding: 12px 16px; }
+      .logo { font-size: 17px; }
+      .card { padding: 18px; border-radius: 12px; }
+      .modal { margin: 16px; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">✦ TON Creator</div>
+    <div class="header-right">
+      <span class="network-badge">Mainnet</span>
+      <button id="connect-btn" class="btn btn-accent">💎 连接钱包</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="container">
+
+    <!-- Wallet Info -->
+    <div id="wallet-info" class="wallet-info" style="display:none">
+      <div id="wallet-icon-el" class="wallet-icon">T</div>
+      <div class="wallet-details">
+        <div class="wallet-name" id="wallet-name-display">Tonkeeper</div>
+        <span class="wallet-addr" id="wallet-addr-display">xxx...xxxx</span>
+      </div>
+      <span class="wallet-balance" id="wallet-balance-display"></span>
+      <button id="disconnect-btn" class="btn btn-ghost" style="font-size:12px;padding:6px 12px;">断开</button>
+    </div>
+
+    <!-- Step 1: Token Parameters -->
+    <div class="card">
+      <div class="card-title"><span class="card-step">1</span> 代币参数</div>
+
+      <div class="form-group">
+        <label>Token 名称</label>
+        <input id="token-name" placeholder="例如: MyToken" value="MyToken" spellcheck="false">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Token 符号</label>
+          <input id="token-symbol" placeholder="例如: MYT" value="MYT" spellcheck="false">
+        </div>
+        <div class="form-group">
+          <label>精度</label>
+          <input id="token-decimals" type="number" value="9" min="0" max="18">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>供应量（总发行量）</label>
+        <input id="token-supply" type="number" value="1000000000" min="1" step="any">
+      </div>
+
+      <div class="form-group">
+        <label>Token Logo（建议 250×250px）</label>
+        <div class="upload-area" id="upload-area">
+          <input type="file" id="token-image-file" accept="image/png,image/jpeg,image/gif,image/webp">
+          <div class="upload-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"/>
+              <path d="M7 8l5-5 5 5"/>
+              <path d="M12 3v12"/>
+            </svg>
+          </div>
+          <img class="upload-preview" id="upload-preview" alt="">
+          <div class="upload-text" id="upload-text">点击上传图片</div>
+          <span class="upload-hint">或使用图床链接（见下方描述框）</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>描述（可选，可填 Logo 图床链接）</label>
+        <textarea id="token-desc" placeholder="代币描述 / 图片 URL..." spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <!-- Step 2: Advanced Options -->
+    <div class="card">
+      <div class="card-title"><span class="card-step">2</span> 高级选项</div>
+
+      <label class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">放弃修改元数据权限</div>
+          <span class="toggle-desc">放弃后将无法修改代币名称、符号、图标等元数据</span>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" id="revoke-metadata" checked>
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </div>
+      </label>
+
+      <label class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">放弃铸币权</div>
+          <span class="toggle-desc">放弃后将无法增发，代币总供应量永久固定</span>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" id="revoke-mint" checked>
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </div>
+      </label>
+    </div>
+
+    <!-- Create Button -->
+    <button id="create-btn" class="btn-create" disabled>
+      <span class="btn-text">✦ 创建 Jetton</span>
+      <span class="spinner"></span>
+    </button>
+
+    <div id="progress-text" class="progress-text"></div>
+    <ul class="step-indicator">
+      <li>连接</li>
+      <li>构建</li>
+      <li>签名</li>
+      <li>完成</li>
+    </ul>
+
+    <div class="create-note">
+      部署费用约 <strong>0.05-0.1 TON</strong>（链上存储费） · 请在 Tonkeeper 中确认签名
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="result-card"></div>
+  </main>
+
+  <div class="footer">Powered by TON Jetton Standard</div>
+
+  <!-- Wallet Selection Modal -->
+  <div id="wallet-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <span id="modal-title">选择钱包</span>
+        <button class="modal-close" id="modal-close-btn">✕</button>
+      </div>
+      <div id="wallet-list" class="wallet-list-container"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Buffer polyfill (TON SDK 需要 Buffer 全局) -->
+  <script src="../buffer-polyfill.js"></script>
+  <!-- TON Connect SDK (CDN) -->
+  <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
+  <!-- TON Creator Bundle (esbuild: ton-creator.js + @ton/core + compiled cells) -->
+  <script src="ton-creator.js"></script>
+  <!-- 启动诊断：检查 TONCreator 是否加载成功 -->
+  <script>
+  (function() {
+    if (typeof TONCreator !== 'undefined' && TONCreator) {
+      console.log('✅ TONCreator loaded:', Object.keys(TONCreator).join(', '));
+    } else {
+      console.error('❌ TONCreator is undefined! ton-creator.js bundle failed to initialize.');
+      // 在页面上显示错误
+      var errDiv = document.createElement('div');
+      errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#ef4444;color:#fff;padding:16px;text-align:center;font-size:14px;font-family:sans-serif;';
+      errDiv.textContent = '⚠️ TON Creator 加载失败，请按 F12 查看控制台错误信息后截图发送给开发者';
+      document.body.prepend(errDiv);
+      // 页面加载完成后，把禁用按钮的提示加上
+      document.addEventListener('DOMContentLoaded', function() {
+        var btn = document.getElementById('create-btn');
+        if (btn) btn.disabled = true;
+      });
+    }
+  })();
+  </script>
+  <!-- UI Controller -->
+  <script>
+  // ======== UI 控制器 ========
+  (function() {
+    const $ = id => document.getElementById(id);
+    let isProcessing = false;
+
+    // ---- 页面元素 ----
+    const connectBtn = $('connect-btn');
+    const disconnectBtn = $('disconnect-btn');
+    const walletInfo = $('wallet-info');
+    const walletName = $('wallet-name-display');
+    const walletAddr = $('wallet-addr-display');
+    const walletBalance = $('wallet-balance-display');
+    const createBtn = $('create-btn');
+    const progressText = $('progress-text');
+    const resultCard = $('result');
+    const steps = document.querySelectorAll('.step-indicator li');
+    const toast = $('toast');
+
+    // ---- 图片上传 ----
+    const uploadArea = $('upload-area');
+    const imageFile = $('token-image-file');
+    const preview = $('upload-preview');
+    const uploadText = $('upload-text');
+    let uploadedImageDataUrl = '';
+
+    imageFile.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        preview.src = ev.target.result;
+        uploadedImageDataUrl = ev.target.result;
+        uploadArea.classList.add('has-file');
+        uploadText.textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // ---- Toast ----
+    function showToast(msg, type) {
+      toast.textContent = msg;
+      toast.className = 'toast show' + (type ? ' ' + type : '');
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => { toast.className = 'toast'; }, 4000);
+    }
+
+    // ---- 步骤指示器 ----
+    function setStep(activeIdx) {
+      steps.forEach((li, i) => {
+        li.className = i < activeIdx ? 'done' : (i === activeIdx ? 'active' : '');
+      });
+    }
+
+    // ---- TON Connect 状态回调 ----
+    if (typeof TONCreator === 'undefined' || !TONCreator) {
+      console.error('TONCreator 未加载，跳过初始化');
+    } else {
+    TONCreator.setStatusCallback(function(wallet) {
+      if (wallet) {
+        const addr = wallet.account.address;
+        // 通过钱包名或默认显示
+        const displayName = wallet.device?.appName || wallet.name || 'Tonkeeper';
+        walletName.textContent = displayName;
+        walletAddr.textContent = formatAddr(addr);
+        walletInfo.style.display = 'flex';
+        connectBtn.textContent = '已连接';
+        connectBtn.disabled = true;
+        createBtn.disabled = false;
+        showToast('✅ 钱包已连接');
+      } else {
+        walletInfo.style.display = 'none';
+        connectBtn.textContent = '💎 连接钱包';
+        connectBtn.disabled = false;
+        createBtn.disabled = true;
+      }
+    });
+    } // else 块结束
+
+    function formatAddr(addr) {
+      if (!addr) return '';
+      return addr.slice(0, 6) + '...' + addr.slice(-6);
+    }
+
+    // ---- 钱包选择弹窗 ----
+    const walletModal = $('wallet-modal');
+    const walletList = $('wallet-list');
+    const modalTitle = $('modal-title');
+    const modalCloseBtn = $('modal-close-btn');
+
+    // 钱包图标颜色映射
+    const walletColors = {
+      'tonkeeper': '#0088cc',
+      'tonhub': '#0055ff',
+      'tonwallet': '#0099aa',
+      'openmask': '#22c55e',
+      'deeplink': '#a855f7',
+      'mytonwallet': '#3b82f6',
+      'tonkite': '#f59e0b',
+    };
+
+    function getWalletColor(name) {
+      const key = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (walletColors[key]) return walletColors[key];
+      // hash-based color
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      const colors = ['#0099cc','#0088cc','#22c55e','#eab308','#ef4444','#a855f7','#ec4899','#06b6d4','#f97316','#14b8a6'];
+      return colors[Math.abs(hash) % colors.length];
+    }
+
+    function addWalletOption(wallet, tag) {
+      const div = document.createElement('button');
+      div.className = 'wallet-option';
+      const color = getWalletColor(wallet.name);
+      const initial = wallet.name.charAt(0).toUpperCase();
+
+      div.innerHTML = `
+        <span class="w-icon" style="background:${color}">${initial}</span>
+        <span>${escapeHtml(wallet.name)}</span>
+        ${tag ? `<span class="w-tag" style="color:${tag.color};background:${tag.color}15">${tag.text}</span>` : ''}
+      `;
+
+      div.addEventListener('click', async () => {
+        walletModal.classList.remove('active');
+        try {
+          setStep(0);
+          showToast(`正在连接 ${wallet.name}...`);
+          await TONCreator.connectWallet(wallet);
+        } catch (e) {
+          showToast('❌ 连接失败: ' + e.message, 'error');
+          console.error(e);
+        }
+      });
+
+      walletList.appendChild(div);
+    }
+
+    function showWalletModal(wallets) {
+      walletList.innerHTML = '';
+
+      const detected = wallets.filter(w => w.isDetected);
+      const others = wallets.filter(w => !w.isDetected);
+
+      modalTitle.textContent = `选择钱包${detected.length > 0 ? '（检测到 ' + detected.length + ' 个）' : ''}`;
+
+      // 已安装的扩展钱包
+      detected.forEach(w => addWalletOption(w, { text: '已安装', color: '#22c55e' }));
+
+      // 分隔线
+      if (detected.length > 0 && others.length > 0) {
+        const divider = document.createElement('div');
+        divider.className = 'modal-divider';
+        divider.textContent = '其他钱包（需手机扫码连接）';
+        walletList.appendChild(divider);
+      }
+
+      // 其他钱包
+      others.forEach(w => addWalletOption(w, null));
+
+      if (wallets.length === 0) {
+        walletList.innerHTML = '<div class="no-wallet-msg">⚠️ 未获取到钱包列表<br><span style="font-size:12px;color:#555570;">请刷新页面后重试</span></div>';
+      }
+
+      walletModal.classList.add('active');
+    }
+
+    // ---- 连接钱包 ----
+    connectBtn.addEventListener('click', async function() {
+      try {
+        const wallets = await TONCreator.getAvailableWallets();
+        showWalletModal(wallets);
+      } catch (e) {
+        showToast('❌ 获取钱包列表失败: ' + e.message, 'error');
+        console.error(e);
+      }
+    });
+
+    // 关闭弹窗
+    modalCloseBtn.addEventListener('click', () => {
+      walletModal.classList.remove('active');
+    });
+    walletModal.addEventListener('click', (e) => {
+      if (e.target === walletModal) walletModal.classList.remove('active');
+    });
+
+    disconnectBtn.addEventListener('click', function() {
+      TONCreator.disconnectWallet();
+      showToast('已断开钱包');
+    });
+
+    // ---- 创建代币 ----
+    createBtn.addEventListener('click', async function() {
+      if (isProcessing) return;
+
+      const wallet = TONCreator.getConnectedWallet();
+      if (!wallet) {
+        showToast('❌ 请先连接钱包', 'error');
+        return;
+      }
+
+      // 收集参数
+      const name = $('token-name').value.trim();
+      const symbol = $('token-symbol').value.trim().toUpperCase();
+      const decimals = parseInt($('token-decimals').value) || 9;
+      const supply = $('token-supply').value.trim();
+      const description = $('token-desc').value.trim();
+
+      if (!name) { showToast('❌ 请输入代币名称', 'error'); return; }
+      if (!symbol) { showToast('❌ 请输入代币符号', 'error'); return; }
+      if (!supply || parseFloat(supply) <= 0) { showToast('❌ 请输入有效供应量', 'error'); return; }
+
+      // 检测描述中是否包含图片 URL
+      let image = uploadedImageDataUrl;
+      if (!image && description && description.match(/^https?:\/\/.+\.(png|jpg|jpeg|gif|webp)/i)) {
+        image = description; // 描述框里放了图片链接
+      }
+
+      if (parseFloat(supply) * Math.pow(10, decimals) > Number.MAX_SAFE_INTEGER) {
+        showToast('⚠️ 供应量过大，建议减少精度或供应量', 'error');
+        return;
+      }
+
+      isProcessing = true;
+      createBtn.classList.add('loading');
+      createBtn.disabled = true;
+
+      try {
+        setStep(1);
+        progressText.textContent = '正在构建合约...';
+        progressText.className = 'progress-text';
+
+        const adminAddr = wallet.account.address;
+
+        const result = await TONCreator.deployJetton(TONCreator.getConnector(), {
+          adminAddress: adminAddr,
+          tokenName: name,
+          tokenSymbol: symbol,
+          tokenDecimals: decimals,
+          totalSupply: supply,
+          description: description,
+          image: image,
+        });
+
+        setStep(2);
+        progressText.textContent = '等待签名...';
+        progressText.className = 'progress-text';
+
+        // 部署结果
+        setStep(3);
+        progressText.textContent = '✅ Jetton 创建成功！';
+        progressText.className = 'progress-text done';
+
+        showSuccess(result, name, symbol, decimals, supply);
+
+      } catch (e) {
+        progressText.textContent = '❌ 创建失败: ' + e.message;
+        progressText.className = 'progress-text error';
+        showToast('❌ ' + e.message, 'error');
+        console.error(e);
+      } finally {
+        isProcessing = false;
+        createBtn.classList.remove('loading');
+        createBtn.disabled = false;
+      }
+    });
+
+    function showSuccess(result, name, symbol, decimals, supply) {
+      resultCard.style.display = 'block';
+      resultCard.innerHTML = `
+        <h3>✅ Jetton 创建成功</h3>
+        <table class="result-table">
+          <tr><td>名称</td><td>${escapeHtml(name)} (${escapeHtml(symbol)})</td></tr>
+          <tr><td>精度</td><td>${decimals}</td></tr>
+          <tr><td>供应量</td><td>${supply}</td></tr>
+          <tr><td>合约地址</td>
+            <td class="result-addr" style="font-size:11px;word-break:break-all;">
+              ${result.contractAddressFriendly}
+            </td>
+          </tr>
+          <tr><td>Explorer</td>
+            <td><a href="${result.explorerUrl}" target="_blank" rel="noopener">${escapeHtml(result.explorerUrl)}</a></td>
+          </tr>
+        </table>
+        <div class="result-json">${JSON.stringify({
+          name, symbol, decimals,
+          totalSupply: supply,
+          address: result.contractAddressFriendly,
+          explorer: result.explorerUrl
+        }, null, 2)}</div>
+        <div style="margin-top:16px;display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="navigator.clipboard.writeText('${result.contractAddressFriendly}').then(()=>showToast('✅ 地址已复制'))">📋 复制地址</button>
+          <a href="${result.explorerUrl}" target="_blank" rel="noopener" class="btn btn-accent" style="text-decoration:none;">🔗 查看合约</a>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  })();
+  </script>
+</body>
+</html>
