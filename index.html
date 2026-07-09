@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -8,36 +8,41 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0d1117;
+      background: #0a0e14;
       color: #e6edf3;
       min-height: 100vh;
     }
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 24px 16px;
-    }
+    .container { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+
+    /* Header */
     h1 {
-      font-size: 24px;
+      font-size: 26px;
       text-align: center;
-      margin-bottom: 8px;
-      color: #58a6ff;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, #58a6ff, #6e40c9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     .subtitle {
       text-align: center;
       color: #8b949e;
-      font-size: 14px;
+      font-size: 13px;
       margin-bottom: 24px;
     }
+
+    /* Cards */
     .card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 8px;
+      background: #131a22;
+      border: 1px solid #1e2a36;
+      border-radius: 12px;
       padding: 20px;
       margin-bottom: 16px;
+      transition: border-color 0.3s;
     }
+    .card:hover { border-color: #2d4054; }
     .card h2 {
-      font-size: 16px;
+      font-size: 15px;
       margin-bottom: 16px;
       color: #c9d1d9;
       display: flex;
@@ -49,16 +54,16 @@
       width: 24px; height: 24px;
       align-items: center; justify-content: center;
       border-radius: 50%;
-      background: #30363d;
+      background: #1e2a36;
       font-size: 12px;
       font-weight: 600;
+      color: #8b949e;
+      transition: all 0.3s;
     }
-    .card h2 .step-num.done {
-      background: #238636;
-    }
-    .form-group {
-      margin-bottom: 14px;
-    }
+    .card h2 .step-num.done { background: #238636; color: #fff; }
+
+    /* Forms */
+    .form-group { margin-bottom: 14px; }
     .form-group label {
       display: block;
       font-size: 13px;
@@ -68,9 +73,9 @@
     .form-group input, .form-group textarea, .form-group select {
       width: 100%;
       padding: 10px 12px;
-      background: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 6px;
+      background: #0a0e14;
+      border: 1px solid #1e2a36;
+      border-radius: 8px;
       color: #e6edf3;
       font-size: 14px;
       outline: none;
@@ -78,92 +83,284 @@
     }
     .form-group input:focus, .form-group textarea:focus {
       border-color: #58a6ff;
+      box-shadow: 0 0 0 3px rgba(88,166,255,0.1);
     }
-    .form-group textarea {
-      min-height: 60px;
-      resize: vertical;
-    }
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-    }
-    .file-upload-wrapper {
-      position: relative;
-    }
+    .form-group textarea { min-height: 60px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+    /* File upload */
+    .file-upload-wrapper { position: relative; }
     .file-upload-wrapper input[type="file"] {
-      position: absolute;
-      opacity: 0;
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-      z-index: 2;
+      position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;
     }
     .file-upload-label {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px;
+      background: #0a0e14;
+      border: 1px dashed #1e2a36;
+      border-radius: 8px;
+      font-size: 14px; color: #8b949e;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .file-upload-label:hover { border-color: #58a6ff; background: #0d1520; }
+    .file-upload-label.has-file { border-color: #3fb950; color: #3fb950; }
+
+    /* ===== Wallet Selector (Custom) ===== */
+    .wallet-selector {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
-      background: #0d1117;
-      border: 1px dashed #30363d;
-      border-radius: 6px;
-      font-size: 14px;
-      color: #8b949e;
+      justify-content: space-between;
+      background: #0a0e14;
+      border: 1px solid #1e2a36;
+      border-radius: 10px;
+      padding: 14px 18px;
       cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    .wallet-selector:hover {
+      border-color: #58a6ff;
+      background: #0d1520;
+      box-shadow: 0 0 0 3px rgba(88,166,255,0.08);
+    }
+    .wallet-selector:active { transform: scale(0.99); }
+
+    .ws-left { display: flex; align-items: center; gap: 12px; }
+    .ws-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+    .ws-icon.wallet-default {
+      background: linear-gradient(135deg, #1e2a36, #2d4054);
+      color: #8b949e;
+    }
+    .ws-icon.wallet-phantom { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+    .ws-icon.wallet-okx { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .ws-icon.wallet-tp { background: linear-gradient(135deg, #10b981, #059669); }
+
+    .ws-info { display: flex; flex-direction: column; gap: 2px; }
+    .ws-label { font-size: 15px; font-weight: 600; color: #e6edf3; }
+    .ws-desc { font-size: 12px; color: #8b949e; }
+    .ws-address { font-size: 12px; color: #58a6ff; font-family: monospace; }
+
+    .ws-arrow {
+      color: #8b949e;
+      font-size: 16px;
+      transition: transform 0.3s;
+    }
+    .wallet-selector:hover .ws-arrow { transform: translateY(2px); }
+
+    .ws-badge {
+      display: inline-flex;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .ws-badge.disconnect {
+      background: #da363333;
+      color: #f85149;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .ws-badge.disconnect:hover { background: #da363355; }
+
+    /* Network select inline with wallet */
+    .wallet-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .wallet-row .wallet-selector { flex: 1; }
+    .network-select-mini {
+      padding: 10px 12px;
+      background: #0a0e14;
+      border: 1px solid #1e2a36;
+      border-radius: 10px;
+      color: #e6edf3;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      height: 54px;
+      min-width: 100px;
       transition: border-color 0.2s;
     }
-    .file-upload-label:hover {
-      border-color: #58a6ff;
+    .network-select-mini:focus { border-color: #58a6ff; }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
     }
-    .file-upload-label.has-file {
-      border-color: #3fb950;
+    .modal-overlay.active { display: flex; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .modal {
+      background: #131a22;
+      border: 1px solid #1e2a36;
+      border-radius: 16px;
+      padding: 0;
+      width: 90%;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 0;
+    }
+    .modal-header h3 {
+      font-size: 18px;
+      color: #e6edf3;
+      background: linear-gradient(135deg, #58a6ff, #6e40c9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: #8b949e;
+      font-size: 20px;
+      cursor: pointer;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { background: #1e2a36; color: #e6edf3; }
+    .modal-subtitle {
+      padding: 4px 24px 16px;
+      font-size: 13px;
+      color: #8b949e;
+    }
+
+    .modal-body { padding: 0 24px 24px; }
+
+    /* Wallet option cards */
+    .wallet-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+      margin-bottom: 10px;
+      background: #0a0e14;
+      position: relative;
+    }
+    .wallet-option:hover {
+      border-color: #2d4054;
+      background: #0d1520;
+      transform: translateX(4px);
+    }
+    .wallet-option:active { transform: scale(0.98); }
+    .wallet-option.recommended { border-color: #a855f733; }
+    .wallet-option.recommended:hover { border-color: #a855f7; }
+
+    .wo-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .wo-icon.phantom { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+    .wo-icon.okx { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .wo-icon.tp { background: linear-gradient(135deg, #10b981, #059669); }
+
+    .wo-info { flex: 1; }
+    .wo-name { font-size: 15px; font-weight: 600; color: #e6edf3; display: block; }
+    .wo-desc { font-size: 12px; color: #8b949e; margin-top: 2px; display: block; }
+
+    .wo-badge {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #a855f733, #7c3aed33);
+      color: #c084fc;
+      white-space: nowrap;
+    }
+
+    .wo-installed-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #3fb950;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(63,185,80,0.5);
+    }
+    .wo-installed-text {
+      font-size: 11px;
       color: #3fb950;
+      margin-left: 2px;
     }
+
+    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       padding: 10px 20px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
     .btn-primary {
-      background: #238636;
+      background: linear-gradient(135deg, #238636, #1a6b2e);
       color: #fff;
     }
-    .btn-primary:hover:not(:disabled) { background: #2ea043; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #2ea043, #238636);
+      box-shadow: 0 0 0 3px rgba(46,160,67,0.2);
+    }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-secondary {
-      background: #30363d;
+      background: #1e2a36;
       color: #c9d1d9;
     }
-    .btn-secondary:hover { background: #3d444d; }
-    .btn-warning {
-      background: #da3633;
-      color: #fff;
+    .btn-secondary:hover { background: #2d4054; }
+
+    /* Steps */
+    .steps { display: flex; gap: 4px; margin-bottom: 16px; }
+    .step {
+      flex: 1; height: 4px;
+      border-radius: 2px;
+      background: #1e2a36;
+      transition: all 0.3s;
     }
-    .btn-warning:hover { background: #f85149; }
-    .wallet-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    #wallet-status {
-      font-size: 13px;
-      color: #8b949e;
-    }
-    #wallet-status.connected {
-      color: #3fb950;
-    }
+    .step.active { background: #58a6ff; box-shadow: 0 0 8px rgba(88,166,255,0.3); }
+    .step.done { background: #238636; }
+
+    /* Status log */
     #status {
-      background: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 6px;
+      background: #0a0e14;
+      border: 1px solid #1e2a36;
+      border-radius: 8px;
       padding: 12px;
       font-family: 'SFMono-Regular', 'Consolas', monospace;
       font-size: 12px;
@@ -173,30 +370,19 @@
       white-space: pre-wrap;
       word-break: break-all;
     }
+    #status::-webkit-scrollbar { width: 4px; }
+    #status::-webkit-scrollbar-track { background: transparent; }
+    #status::-webkit-scrollbar-thumb { background: #1e2a36; border-radius: 2px; }
     #status .log-error { color: #f85149; }
     #status .log-success { color: #3fb950; }
     #status .log-warning { color: #d29922; }
 
-    .steps {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 16px;
-    }
-    .step {
-      flex: 1;
-      height: 4px;
-      border-radius: 2px;
-      background: #30363d;
-      transition: background 0.3s;
-    }
-    .step.active { background: #58a6ff; }
-    .step.done { background: #238636; }
-
+    /* Result */
     #result {
       display: none;
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 8px;
+      background: #131a22;
+      border: 1px solid #1e2a36;
+      border-radius: 12px;
       padding: 20px;
       margin-top: 16px;
     }
@@ -208,55 +394,146 @@
     #result .addr { font-family: monospace; color: #58a6ff; font-size: 12px; }
     #result a { color: #58a6ff; font-size: 13px; }
     #result pre {
-      background: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 4px;
+      background: #0a0e14;
+      border: 1px solid #1e2a36;
+      border-radius: 8px;
       padding: 10px;
       font-size: 11px;
       overflow-x: auto;
       margin: 8px 0;
     }
-    .network-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 600;
+
+    /* Revoke checkboxes */
+    .revoke-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      cursor: pointer;
+      border-bottom: 1px solid #1e2a36;
     }
-    .network-devnet { background: #1f6feb22; color: #58a6ff; border: 1px solid #1f6feb44; }
-    .network-mainnet { background: #da363322; color: #f85149; border: 1px solid #da363344; }
+    .revoke-item:last-child { border-bottom: none; }
+    .revoke-item input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: #238636;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .revoke-label { cursor: pointer; }
+    .revoke-title { font-size: 14px; color: #c9d1d9; }
+    .revoke-desc { font-size: 12px; color: #8b949e; margin-top: 2px; }
+
     .footer {
       text-align: center;
       color: #484f58;
       font-size: 12px;
       padding: 24px 0;
     }
+
     @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr 1fr; }
+      .wallet-row { flex-direction: column; }
+      .network-select-mini { width: 100%; min-width: unset; height: auto; }
     }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e2a36; border-radius: 3px; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>⚡ Solana Token Creator</h1>
-    <p class="subtitle">浏览器发币工具 · Token-2022</p>
+    <p class="subtitle">Token-2022 · 浏览器发币</p>
 
-    <!-- 钱包连接 -->
+    <!-- 连接钱包 (Custom Wallet Selector) -->
     <div class="card">
-      <h2>🔗 连接钱包</h2>
-      <div class="wallet-bar">
-        <span id="wallet-status">未连接</span>
-        <div>
-          <select id="wallet-select" class="btn btn-secondary" style="margin-right:6px;padding:8px 6px;width:90px;">
-            <option value="auto">🤖 自动</option>
-            <option value="phantom">👻 Phantom</option>
-            <option value="okx">🔵 OKX</option>
-          </select>
-          <select id="network-select" class="btn btn-secondary" style="margin-right:6px;padding:8px 12px;">
-            <option value="devnet">🧪 Devnet</option>
-            <option value="mainnet">🚀 Mainnet</option>
-          </select>
-          <button id="connect-btn" class="btn btn-primary">连接钱包</button>
+      <h2><span class="step-num">0</span> 🔗 连接钱包</h2>
+      <div class="wallet-row">
+        <div class="wallet-selector" id="wallet-selector">
+          <div class="ws-left">
+            <div class="ws-icon wallet-default" id="ws-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <circle cx="16" cy="12" r="2"/>
+              </svg>
+            </div>
+            <div class="ws-info">
+              <span class="ws-label" id="ws-label">选择钱包</span>
+              <span class="ws-desc" id="ws-desc">点击选择 Phantom / OKX / TokenPocket</span>
+            </div>
+          </div>
+          <span class="ws-arrow" id="ws-arrow">▾</span>
+        </div>
+        <select id="network-select" class="network-select-mini">
+          <option value="devnet">🧪 Devnet</option>
+          <option value="mainnet">🚀 Mainnet</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 隐藏元素（兼容 bundle.js） -->
+    <select id="wallet-select" style="display:none">
+      <option value="auto">🤖 自动</option>
+      <option value="phantom">👻 Phantom</option>
+      <option value="okx">🔵 OKX</option>
+      <option value="tp">🟢 TokenPocket</option>
+    </select>
+    <button id="connect-btn" style="display:none">连接钱包</button>
+    <span id="wallet-status" style="display:none">未连接</span>
+
+    <!-- 钱包选择弹窗 -->
+    <div class="modal-overlay" id="wallet-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>选择钱包</h3>
+          <button class="modal-close" id="modal-close">✕</button>
+        </div>
+        <div class="modal-subtitle">选择以下任一 Solana 钱包连接</div>
+        <div class="modal-body">
+          <!-- Phantom -->
+          <div class="wallet-option recommended" data-wallet="phantom">
+            <div class="wo-icon phantom">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
+                <path d="M19.5 12c0-4.14-3.36-7.5-7.5-7.5S4.5 7.86 4.5 12c0 2.76 1.5 5.16 3.75 6.38.25.13.55-.03.55-.31V16.5c-1.1 0-2-.9-2-2v-1.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v1.38c0 .22.18.4.4.4h2.8c.22 0 .4-.18.4-.4V14c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v1.5c0 1.1-.9 2-2 2v1.57c0 .28.3.44.55.31C18 17.16 19.5 14.76 19.5 12z"/>
+              </svg>
+            </div>
+            <div class="wo-info">
+              <span class="wo-name">Phantom</span>
+              <span class="wo-desc">最流行的 Solana 钱包</span>
+            </div>
+            <span class="wo-badge">推荐</span>
+            <span class="wo-installed-dot" id="detect-phantom"></span>
+          </div>
+
+          <!-- OKX -->
+          <div class="wallet-option" data-wallet="okx">
+            <div class="wo-icon okx">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
+                <text x="12" y="17" text-anchor="middle" font-size="14" font-weight="bold" fill="white">O</text>
+              </svg>
+            </div>
+            <div class="wo-info">
+              <span class="wo-name">OKX Wallet</span>
+              <span class="wo-desc">一多链钱包，支持 Solana</span>
+            </div>
+            <span class="wo-installed-dot" id="detect-okx"></span>
+          </div>
+
+          <!-- TokenPocket -->
+          <div class="wallet-option" data-wallet="tp">
+            <div class="wo-icon tp">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
+                <text x="12" y="17" text-anchor="middle" font-size="14" font-weight="bold" fill="white">TP</text>
+              </svg>
+            </div>
+            <div class="wo-info">
+              <span class="wo-name">TokenPocket</span>
+              <span class="wo-desc">多平台钱包，支持 Solana</span>
+            </div>
+            <span class="wo-installed-dot" id="detect-tp"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -283,7 +560,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label>代币头像（可选，上传后将自动显示在钱包中）</label>
+        <label>代币头像（可选）</label>
         <div class="file-upload-wrapper">
           <input id="token-image-file" type="file" accept="image/*">
           <div class="file-upload-label" id="file-label">
@@ -305,27 +582,27 @@
     <div class="card">
       <h2><span class="step-num">2</span> ⚙️ 高级选项</h2>
 
-      <label style="display:flex;align-items:center;gap:12px;padding:8px 0;cursor:pointer;border-bottom:1px solid #30363d;">
-        <input type="checkbox" id="revoke-metadata" checked style="width:16px;height:16px;accent-color:#238636;">
-        <div>
-          <div style="font-size:14px;color:#c9d1d9;">放弃元数据修改权</div>
-          <div style="font-size:12px;color:#8b949e;margin-top:2px;">放弃后将无法修改代币名称、符号、图标等元数据</div>
+      <label class="revoke-item">
+        <input type="checkbox" id="revoke-metadata" checked>
+        <div class="revoke-label">
+          <div class="revoke-title">放弃元数据修改权</div>
+          <div class="revoke-desc">放弃后将无法修改代币名称、符号、图标等元数据</div>
         </div>
       </label>
 
-      <label style="display:flex;align-items:center;gap:12px;padding:8px 0;cursor:pointer;border-bottom:1px solid #30363d;">
-        <input type="checkbox" id="revoke-mint" checked style="width:16px;height:16px;accent-color:#238636;">
-        <div>
-          <div style="font-size:14px;color:#c9d1d9;">放弃铸币权</div>
-          <div style="font-size:12px;color:#8b949e;margin-top:2px;">放弃后将无法增发，代币总供应量永久固定</div>
+      <label class="revoke-item">
+        <input type="checkbox" id="revoke-mint" checked>
+        <div class="revoke-label">
+          <div class="revoke-title">放弃铸币权</div>
+          <div class="revoke-desc">放弃后将无法增发，代币总供应量永久固定</div>
         </div>
       </label>
 
-      <label style="display:flex;align-items:center;gap:12px;padding:8px 0;cursor:pointer;">
-        <input type="checkbox" id="revoke-freeze" checked style="width:16px;height:16px;accent-color:#238636;">
-        <div>
-          <div style="font-size:14px;color:#c9d1d9;">放弃冻结权</div>
-          <div style="font-size:12px;color:#8b949e;margin-top:2px;">放弃后将无法冻结任何账户的转账功能</div>
+      <label class="revoke-item">
+        <input type="checkbox" id="revoke-freeze" checked>
+        <div class="revoke-label">
+          <div class="revoke-title">放弃冻结权</div>
+          <div class="revoke-desc">放弃后将无法冻结任何账户的转账功能</div>
         </div>
       </label>
     </div>
@@ -349,7 +626,7 @@
     <!-- 状态日志 -->
     <div class="card">
       <h2>📋 日志</h2>
-      <div id="status">准备就绪，连接钱包开始</div>
+      <div id="status">准备就绪，选择钱包开始</div>
     </div>
 
     <!-- 结果 -->
@@ -360,9 +637,152 @@
     </div>
   </div>
 
+  <!-- ===== 弹窗 + 钱包选择逻辑 ===== -->
+  <script>
+    (function() {
+      const WS = document.getElementById('wallet-selector');
+      const modal = document.getElementById('wallet-modal');
+      const modalClose = document.getElementById('modal-close');
+      const connectBtn = document.getElementById('connect-btn');
+      const walletSelect = document.getElementById('wallet-select');
+      const walletStatus = document.getElementById('wallet-status');
+      const wsLabel = document.getElementById('ws-label');
+      const wsDesc = document.getElementById('ws-desc');
+      const wsIcon = document.getElementById('ws-icon');
+      const wsArrow = document.getElementById('ws-arrow');
+
+      // 检测已安装钱包
+      function detectWallets() {
+        const dots = {
+          phantom: document.getElementById('detect-phantom'),
+          okx: document.getElementById('detect-okx'),
+          tp: document.getElementById('detect-tp')
+        };
+        const installed = [];
+
+        if (window.phantom?.solana || window.solana?.isPhantom) {
+          installed.push('phantom');
+          if (dots.phantom) { dots.phantom.style.background = '#3fb950'; }
+        }
+        if (window.okxwallet?.solana) {
+          installed.push('okx');
+          if (dots.okx) { dots.okx.style.background = '#3fb950'; }
+        }
+        if (window.tp?.solana || window.tokenpocket?.solana) {
+          installed.push('tp');
+          if (dots.tp) { dots.tp.style.background = '#3fb950'; }
+        }
+        return installed;
+      }
+
+      // 更新钱包选择器 UI
+      function updateSelectorUI(walletName, address) {
+        const icons = {
+          phantom: { cls: 'wallet-phantom', html: `<svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M19.5 12c0-4.14-3.36-7.5-7.5-7.5S4.5 7.86 4.5 12c0 2.76 1.5 5.16 3.75 6.38.25.13.55-.03.55-.31V16.5c-1.1 0-2-.9-2-2v-1.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v1.38c0 .22.18.4.4.4h2.8c.22 0 .4-.18.4-.4V14c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v1.5c0 1.1-.9 2-2 2v1.57c0 .28.3.44.55.31C18 17.16 19.5 14.76 19.5 12z"/></svg>` },
+          okx: { cls: 'wallet-okx', html: `<svg width="22" height="22" viewBox="0 0 24 24" fill="white"><text x="12" y="17" text-anchor="middle" font-size="14" font-weight="bold">O</text></svg>` },
+          tp: { cls: 'wallet-tp', html: `<svg width="22" height="22" viewBox="0 0 24 24" fill="white"><text x="12" y="17" text-anchor="middle" font-size="12" font-weight="bold">TP</text></svg>` }
+        };
+
+        if (!walletName) {
+          // 未连接
+          wsIcon.className = 'ws-icon wallet-default';
+          wsIcon.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="16" cy="12" r="2"/></svg>`;
+          wsLabel.textContent = '选择钱包';
+          wsDesc.textContent = '点击选择 Phantom / OKX / TokenPocket';
+          return;
+        }
+
+        const w = walletName.toLowerCase();
+        const info = icons[w] || icons.phantom;
+        wsIcon.className = 'ws-icon ' + info.cls;
+        wsIcon.innerHTML = info.html;
+        wsLabel.textContent = walletName.charAt(0).toUpperCase() + walletName.slice(1);
+        if (address) {
+          const short = address.substring(0, 6) + '...' + address.substring(address.length - 4);
+          wsDesc.innerHTML = '<span class="ws-address">' + short + '</span>';
+        } else {
+          wsDesc.textContent = '已连接';
+        }
+      }
+
+      // 同步连接状态：监听 wallet-status 的 class 变化
+      function syncUI() {
+        const isConnected = walletStatus.classList.contains('connected');
+        if (isConnected) {
+          // 从 walletStatus 文本解析钱包名和地址
+          const text = walletStatus.textContent || '';
+          // 格式: "✅ Phantom: 0x1234...abcd"
+          const match = text.match(/✅\s*(\w+):\s*(.+)/);
+          if (match) {
+            updateSelectorUI(match[1], match[2]);
+          }
+        } else {
+          updateSelectorUI(null, null);
+        }
+      }
+
+      // Observer wallet-status changes
+      const observer = new MutationObserver(syncUI);
+      observer.observe(walletStatus, { attributes: true, childList: true, subtree: true, characterData: true });
+
+      // === Modal 操作 ===
+      function openModal() {
+        if (walletStatus.classList.contains('connected')) return; // 已连接不弹
+        detectWallets();
+        modal.classList.add('active');
+      }
+
+      function closeModal() {
+        modal.classList.remove('active');
+      }
+
+      // 选择钱包
+      function selectWallet(wallet) {
+        walletSelect.value = wallet;
+        closeModal();
+        // 触发 bundle 的连接
+        connectBtn.click();
+      }
+
+      // 点击选择器
+      WS.addEventListener('click', function(e) {
+        if (walletStatus.classList.contains('connected')) {
+          // 已连接 → 断开
+          connectBtn.click();
+          return;
+        }
+        openModal();
+      });
+
+      // Modal 钱包点击
+      document.querySelectorAll('.wallet-option').forEach(function(el) {
+        el.addEventListener('click', function() {
+          const wallet = this.dataset.wallet;
+          selectWallet(wallet);
+        });
+      });
+
+      // 关闭按钮
+      modalClose.addEventListener('click', closeModal);
+
+      // 点击遮罩关闭
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+      });
+
+      // ESC 关闭
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+      });
+
+      // 初始检测
+      setTimeout(detectWallets, 500);
+    })();
+  </script>
+
   <!-- Buffer polyfill -->
   <script src="buffer-polyfill.js"></script>
   <script src="https://unpkg.com/@solana/web3.js@1.98.0/lib/index.iife.js"></script>
-  <script src="bundle.js?v=4"></script>
+  <script src="bundle.js?v=5"></script>
 </body>
 </html>
