@@ -1,339 +1,522 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solana Token-2022 Creator</title>
+  <title>Solana Token Creator - 一键发币</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0d1117;
-      color: #e6edf3;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #07070a;
+      color: #e8e8f0;
       min-height: 100vh;
+      overflow-x: hidden;
     }
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 24px 16px;
+    ::selection { background: rgba(124, 58, 237, 0.3); }
+
+    /* ===== Background Glow ===== */
+    .bg-glow {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(124,58,237,0.08) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99,102,241,0.06) 0%, transparent 60%);
     }
-    h1 {
-      font-size: 24px;
-      text-align: center;
-      margin-bottom: 8px;
-      color: #58a6ff;
+
+    /* ===== Layout ===== */
+    .container { max-width: 640px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    /* ===== Header ===== */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; max-width: 640px; margin: 0 auto;
     }
-    .subtitle {
-      text-align: center;
-      color: #8b949e;
-      font-size: 14px;
-      margin-bottom: 24px;
+    .logo {
+      font-size: 20px; font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #818cf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
     }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .network-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      background: rgba(34, 197, 94, 0.1); color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .network-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: #22c55e; display: inline-block;
+    }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 20px; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-accent {
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      color: #fff; box-shadow: 0 0 24px rgba(124,58,237,0.2);
+    }
+    .btn-accent:hover { box-shadow: 0 0 32px rgba(124,58,237,0.35); transform: translateY(-1px); }
+    .btn-accent:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-ghost {
+      background: rgba(255,255,255,0.06); color: #a0a0b8;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #e8e8f0; }
+    .btn-danger {
+      background: rgba(239,68,68,0.12); color: #f87171;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+    /* ===== Wallet Info Bar ===== */
+    .wallet-info {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; margin-bottom: 20px;
+      background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.15);
+      border-radius: 14px;
+    }
+    .wallet-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .wallet-details { flex: 1; min-width: 0; }
+    .wallet-name { font-size: 13px; font-weight: 600; color: #e8e8f0; }
+    .wallet-addr {
+      font-size: 12px; font-family: 'SF Mono', 'Consolas', monospace;
+      color: #8888a0; display: block; margin-top: 1px;
+    }
+    .wallet-balance { font-size: 12px; color: #22c55e; font-weight: 500; margin-left: auto; }
+
+    /* ===== Cards ===== */
     .card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px; padding: 24px; margin-bottom: 16px;
+      backdrop-filter: blur(4px);
     }
-    .card h2 {
-      font-size: 16px;
-      margin-bottom: 16px;
-      color: #c9d1d9;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .card-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 15px; font-weight: 700; color: #c8c8e0;
+      margin-bottom: 20px;
     }
-    .card h2 .step-num {
-      display: inline-flex;
-      width: 24px; height: 24px;
-      align-items: center; justify-content: center;
-      border-radius: 50%;
-      background: #30363d;
-      font-size: 12px;
-      font-weight: 600;
+    .card-step {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 8px;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
     }
-    .card h2 .step-num.done {
-      background: #238636;
-    }
-    .form-group {
-      margin-bottom: 14px;
-    }
+
+    /* ===== Form ===== */
+    .form-group { margin-bottom: 18px; }
+    .form-group:last-child { margin-bottom: 0; }
     .form-group label {
-      display: block;
-      font-size: 13px;
-      color: #8b949e;
-      margin-bottom: 4px;
+      display: block; font-size: 13px; font-weight: 500;
+      color: #9898b0; margin-bottom: 6px;
     }
     .form-group input, .form-group textarea, .form-group select {
-      width: 100%;
-      padding: 10px 12px;
-      background: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      color: #e6edf3;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
+      width: 100%; padding: 12px 14px;
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px; color: #e8e8f0; font-size: 14px;
+      font-family: inherit; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
     }
     .form-group input:focus, .form-group textarea:focus {
-      border-color: #58a6ff;
+      border-color: rgba(124,58,237,0.4);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.08);
     }
-    .form-group textarea {
-      min-height: 60px;
-      resize: vertical;
-    }
+    .form-group input::placeholder, .form-group textarea::placeholder { color: #555570; }
+    .form-group textarea { min-height: 72px; resize: vertical; }
     .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     }
-    .file-upload-wrapper {
-      position: relative;
+    .form-row-3 {
+      display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px;
     }
-    .file-upload-wrapper input[type="file"] {
-      position: absolute;
-      opacity: 0;
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-      z-index: 2;
-    }
-    .file-upload-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
-      background: #0d1117;
-      border: 1px dashed #30363d;
-      border-radius: 6px;
-      font-size: 14px;
-      color: #8b949e;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .file-upload-label:hover {
-      border-color: #58a6ff;
-    }
-    .file-upload-label.has-file {
-      border-color: #3fb950;
-      color: #3fb950;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-primary {
-      background: #238636;
-      color: #fff;
-    }
-    .btn-primary:hover:not(:disabled) { background: #2ea043; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-secondary {
-      background: #30363d;
-      color: #c9d1d9;
-    }
-    .btn-secondary:hover { background: #3d444d; }
-    .btn-warning {
-      background: #da3633;
-      color: #fff;
-    }
-    .btn-warning:hover { background: #f85149; }
-    .wallet-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    #wallet-status {
-      font-size: 13px;
-      color: #8b949e;
-    }
-    #wallet-status.connected {
-      color: #3fb950;
-    }
-    #status {
-      background: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      padding: 12px;
-      font-family: 'SFMono-Regular', 'Consolas', monospace;
-      font-size: 12px;
-      line-height: 1.6;
-      max-height: 300px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-    #status .log-error { color: #f85149; }
-    #status .log-success { color: #3fb950; }
-    #status .log-warning { color: #d29922; }
 
-    .steps {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 16px;
+    /* ===== File Upload ===== */
+    .upload-area {
+      position: relative; border: 1.5px dashed rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 28px 16px;
+      text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
     }
-    .step {
-      flex: 1;
-      height: 4px;
-      border-radius: 2px;
-      background: #30363d;
-      transition: background 0.3s;
+    .upload-area:hover { border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.03); }
+    .upload-area.has-file { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.03); }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2;
     }
-    .step.active { background: #58a6ff; }
-    .step.done { background: #238636; }
+    .upload-icon {
+      width: 40px; height: 40px; margin: 0 auto 10px;
+      background: rgba(124,58,237,0.1); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .upload-icon svg { width: 20px; height: 20px; color: #7c3aed; }
+    .upload-text { font-size: 14px; font-weight: 500; color: #a0a0b8; }
+    .upload-hint { display: block; font-size: 12px; color: #555570; margin-top: 6px; }
+    .upload-preview {
+      display: none; width: 64px; height: 64px; border-radius: 12px;
+      object-fit: cover; margin: 0 auto 8px; border: 2px solid rgba(34,197,94,0.2);
+    }
+    .upload-area.has-file .upload-preview { display: block; }
+    .upload-area.has-file .upload-icon { display: none; }
+    .upload-area.has-file .upload-hint { display: none; }
 
-    #result {
-      display: none;
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 20px;
-      margin-top: 16px;
+    /* ===== Toggle Switches ===== */
+    .toggle-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 0; cursor: pointer; user-select: none;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
     }
-    #result h3 { color: #3fb950; margin-bottom: 12px; }
-    #result table { width: 100%; margin-bottom: 12px; }
-    #result table td { padding: 4px 8px; font-size: 13px; }
-    #result table td:first-child { color: #8b949e; width: 80px; }
-    #result table td:last-child { word-break: break-all; }
-    #result .addr { font-family: monospace; color: #58a6ff; font-size: 12px; }
-    #result a { color: #58a6ff; font-size: 13px; }
-    #result pre {
-      background: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 4px;
-      padding: 10px;
-      font-size: 11px;
-      overflow-x: auto;
-      margin: 8px 0;
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-row:first-child { padding-top: 0; }
+    .toggle-info { flex: 1; min-width: 0; }
+    .toggle-title { font-size: 14px; font-weight: 600; color: #c8c8e0; }
+    .toggle-desc { display: block; font-size: 12px; color: #686880; margin-top: 2px; line-height: 1.4; }
+    .toggle-switch {
+      position: relative; width: 44px; height: 26px; flex-shrink: 0;
     }
-    .network-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 600;
+    .toggle-switch input {
+      position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2;
     }
-    .network-devnet { background: #1f6feb22; color: #58a6ff; border: 1px solid #1f6feb44; }
-    .network-mainnet { background: #da363322; color: #f85149; border: 1px solid #da363344; }
-    .footer {
+    .toggle-track {
+      position: absolute; inset: 0; border-radius: 13px;
+      background: rgba(255,255,255,0.08); transition: background 0.25s;
+    }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+      border-radius: 50%; background: #555570;
+      transition: transform 0.25s, background 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .toggle-switch input:checked ~ .toggle-track { background: rgba(124,58,237,0.4); }
+    .toggle-switch input:checked ~ .toggle-thumb {
+      transform: translateX(18px); background: #7c3aed;
+    }
+
+    /* ===== Create Button ===== */
+    .btn-create {
+      width: 100%; padding: 16px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
+      font-family: inherit; letter-spacing: 0.3px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 24px rgba(124,58,237,0.2);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-bottom: 20px;
+    }
+    .btn-create:hover:not(:disabled) {
+      box-shadow: 0 6px 32px rgba(124,58,237,0.35);
+      transform: translateY(-2px);
+    }
+    .btn-create:active:not(:disabled) { transform: translateY(0); }
+    .btn-create:disabled {
+      opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none;
+    }
+    .btn-create .spinner {
+      display: none; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    .btn-create.loading .spinner { display: inline-block; }
+    .btn-create.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .create-note {
+      text-align: center; font-size: 12px; color: #555570; margin-bottom: 20px; line-height: 1.5;
+    }
+    .create-note strong { color: #a78bfa; font-weight: 500; }
+
+    /* ===== Step Indicator ===== */
+    .step-indicator {
+      list-style: none; display: flex; justify-content: center; gap: 8px;
+      margin: 0 0 12px; padding: 0;
+    }
+    .step-indicator li {
+      font-size: 11px; font-weight: 600; color: #555570;
+      padding: 4px 12px; border-radius: 20px;
+      background: rgba(255,255,255,0.03);
+      transition: all 0.3s ease;
+    }
+    .step-indicator li.active {
+      color: #818cf8; background: rgba(124,58,237,0.12);
+    }
+    .step-indicator li.done {
+      color: #22c55e; background: rgba(34,197,94,0.1);
+    }
+
+    /* ===== Progress Text ===== */
+    .progress-text {
       text-align: center;
-      color: #484f58;
-      font-size: 12px;
-      padding: 24px 0;
+      font-size: 14px;
+      color: #818cf8;
+      margin-bottom: 16px;
+      min-height: 22px;
+      font-weight: 500;
+      transition: opacity 0.3s;
     }
+    .progress-text.done {
+      color: #22c55e;
+    }
+    .progress-text.error {
+      color: #ef4444;
+    }
+
+
+    /* ===== Result Card ===== */
+    .result-card {
+      display: none; margin-top: 16px;
+      background: linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02));
+      border: 1px solid rgba(34,197,94,0.15); border-radius: 16px; padding: 24px;
+    }
+    .result-card h3 {
+      font-size: 18px; font-weight: 700; color: #22c55e; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .result-table { width: 100%; margin-bottom: 16px; }
+    .result-table td { padding: 6px 8px; font-size: 13px; vertical-align: top; }
+    .result-table td:first-child { color: #686880; width: 80px; white-space: nowrap; }
+    .result-table td:last-child { word-break: break-all; color: #c8c8e0; font-weight: 500; }
+    .result-addr { font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; color: #818cf8; }
+    .result-table a { color: #818cf8; font-size: 13px; text-decoration: none; }
+    .result-table a:hover { text-decoration: underline; }
+    .result-table img { width: 36px; height: 36px; border-radius: 10px; border: 2px solid rgba(34,197,94,0.2); }
+    .result-json {
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px; padding: 12px; font-size: 11px; font-family: 'SF Mono', 'Consolas', monospace;
+      overflow-x: auto; color: #8888a0; margin-top: 12px; white-space: pre;
+    }
+
+    /* ===== Wallet Modal ===== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #0d0d18; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 24px; width: 100%; max-width: 380px;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .modal-header span { font-size: 17px; font-weight: 700; color: #e8e8f0; }
+    .modal-close {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border: none; background: rgba(255,255,255,0.06); border-radius: 8px;
+      color: #686880; font-size: 18px; cursor: pointer; transition: background 0.2s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.1); color: #e8e8f0; }
+    .wallet-option {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; width: 100%; border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02); border-radius: 12px;
+      color: #e8e8f0; font-size: 15px; font-weight: 500; cursor: pointer;
+      font-family: inherit; transition: all 0.2s; margin-bottom: 8px;
+    }
+    .wallet-option:last-child { margin-bottom: 0; }
+    .wallet-option:hover { border-color: rgba(124,58,237,0.25); background: rgba(124,58,237,0.04); }
+    .wallet-option .w-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .wallet-option .w-tag {
+      margin-left: auto; font-size: 11px; padding: 3px 8px;
+      border-radius: 6px; background: rgba(255,255,255,0.04); color: #555570;
+    }
+    .wallet-option .w-check {
+      margin-left: auto; color: #22c55e; font-size: 16px; display: none;
+    }
+    .wallet-option.connected .w-check { display: block; }
+    .wallet-option.connected .w-tag { display: none; }
+    .no-wallet-msg {
+      text-align: center; padding: 20px; color: #686880; font-size: 14px;
+    }
+    .no-wallet-msg a { color: #818cf8; text-decoration: none; }
+    .no-wallet-msg a:hover { text-decoration: underline; }
+
+    /* ===== Footer ===== */
+    .footer { text-align: center; font-size: 12px; color: #383840; padding: 24px 0; }
+
+    /* ===== Responsive ===== */
     @media (max-width: 600px) {
-      .form-row { grid-template-columns: 1fr 1fr; }
+      .container { padding: 16px 12px 40px; }
+      header { padding: 12px 16px; }
+      .logo { font-size: 17px; }
+      .card { padding: 18px; border-radius: 12px; }
+      .form-row-3 { grid-template-columns: 1fr 1fr; }
+      .modal { margin: 16px; padding: 20px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>⚡ Solana Token Creator</h1>
-    <p class="subtitle">浏览器发币工具 · Token-2022</p>
+  <div class="bg-glow"></div>
 
-    <!-- 钱包连接 -->
-    <div class="card">
-      <h2>🔗 连接钱包</h2>
-      <div class="wallet-bar">
-        <span id="wallet-status">未连接</span>
-        <div>
-          <select id="wallet-select" class="btn btn-secondary" style="margin-right:6px;padding:8px 6px;width:90px;">
-            <option value="auto">🤖 自动</option>
-            <option value="phantom">👻 Phantom</option>
-            <option value="okx">🔵 OKX</option>
-          </select>
-          <select id="network-select" class="btn btn-secondary" style="margin-right:6px;padding:8px 12px;">
-            <option value="devnet">🧪 Devnet</option>
-            <option value="mainnet">🚀 Mainnet</option>
-          </select>
-          <button id="connect-btn" class="btn btn-primary">连接钱包</button>
-        </div>
+  <!-- ===== Header ===== -->
+  <header>
+    <div class="logo">✦ Token Creator</div>
+    <div class="header-right">
+      <span class="network-badge">Mainnet</span>
+      <button id="connect-btn" class="btn btn-accent">连接钱包</button>
+    </div>
+  </header>
+
+  <!-- ===== Main ===== -->
+  <main class="container">
+
+    <!-- Wallet Connected Info -->
+    <div id="wallet-info" class="wallet-info" style="display:none">
+      <div id="wallet-icon-el" class="wallet-icon" style="background:#7c3aed">P</div>
+      <div class="wallet-details">
+        <div class="wallet-name" id="wallet-name-display">Phantom</div>
+        <span class="wallet-addr" id="wallet-addr-display">xxx...xxxx</span>
       </div>
+      <span class="wallet-balance" id="wallet-balance-display"></span>
+      <button id="disconnect-btn" class="btn btn-ghost" style="font-size:12px;padding:6px 12px;">断开</button>
     </div>
 
-    <!-- 代币参数 -->
+    <!-- ===== Card 1: Token Parameters ===== -->
     <div class="card">
-      <h2><span class="step-num">1</span> 代币参数</h2>
+      <div class="card-title"><span class="card-step">1</span> 代币参数</div>
+
       <div class="form-group">
-        <label>代币名称</label>
-        <input id="token-name" placeholder="例如: My Token" value="MyToken">
+        <label>Token 名称</label>
+        <input id="token-name" placeholder="例如: MyToken" value="MyToken" spellcheck="false">
       </div>
+
       <div class="form-row">
         <div class="form-group">
-          <label>符号</label>
-          <input id="token-symbol" placeholder="例如: MYT" value="MYT">
+          <label>Token 符号</label>
+          <input id="token-symbol" placeholder="例如: MYT" value="MYT" spellcheck="false">
         </div>
         <div class="form-group">
           <label>精度</label>
-          <input id="token-decimals" type="number" value="9">
-        </div>
-        <div class="form-group">
-          <label>总量</label>
-          <input id="token-supply" type="number" value="10000000">
+          <input id="token-decimals" type="number" value="9" min="0" max="18">
         </div>
       </div>
+
       <div class="form-group">
-        <label>代币头像（可选，上传后将自动显示在钱包中）</label>
-        <div class="file-upload-wrapper">
-          <input id="token-image-file" type="file" accept="image/*">
-          <div class="file-upload-label" id="file-label">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M8 1L8 11M8 1L11 4M8 1L5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 10V13C2 13.5523 2.44772 14 3 14H13C13.5523 14 14 13.5523 14 13V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <label>供应量</label>
+        <input id="token-supply" type="number" value="1000000000" min="1" step="any">
+      </div>
+
+      <div class="form-group">
+        <label>Token Logo（可选）</label>
+        <div class="upload-area" id="upload-area">
+          <input type="file" id="token-image-file" accept="image/png,image/jpeg,image/gif,image/webp">
+          <div class="upload-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"/>
+              <path d="M7 8l5-5 5 5"/>
+              <path d="M12 3v12"/>
             </svg>
-            <span id="file-label-text">点击选择图片（PNG/JPG）</span>
           </div>
+          <img class="upload-preview" id="upload-preview" alt="">
+          <div class="upload-text" id="upload-text">点击上传图片</div>
+          <span class="upload-hint">建议 250×250px · PNG/JPG/GIF/WEBP</span>
         </div>
       </div>
+
       <div class="form-group">
-        <label>描述</label>
-        <textarea id="token-desc" placeholder="代币描述（可选）"></textarea>
+        <label>描述（可选）</label>
+        <textarea id="token-desc" placeholder="描述你的代币..." spellcheck="false"></textarea>
       </div>
     </div>
 
-    <!-- 创建 -->
+    <!-- ===== Card 2: Advanced Options ===== -->
     <div class="card">
-      <h2><span class="step-num">2</span> 🚀 创建代币</h2>
-      <button id="create-btn" class="btn btn-primary" disabled style="width:100%;justify-content:center;padding:14px;">
-        ✨ 创建代币
-      </button>
+      <div class="card-title"><span class="card-step">2</span> 高级选项</div>
+
+      <label class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">放弃元数据修改权</div>
+          <span class="toggle-desc">放弃后将无法修改代币名称、符号、图标等元数据，让投资者更放心</span>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" id="revoke-metadata" checked>
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </div>
+      </label>
+
+      <label class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">放弃铸币权</div>
+          <span class="toggle-desc">放弃后将无法增发，代币总供应量永久固定</span>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" id="revoke-mint" checked>
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </div>
+      </label>
+
+      <label class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">放弃冻结权</div>
+          <span class="toggle-desc">放弃后将无法冻结任何账户的转账功能</span>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" id="revoke-freeze" checked>
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </div>
+      </label>
     </div>
 
-    <!-- 进度条 -->
-    <div class="steps">
-      <div class="step active"></div>
-      <div class="step"></div>
-      <div class="step"></div>
-      <div class="step"></div>
+    <!-- ===== Create Button ===== -->
+    <button id="create-btn" class="btn-create" disabled>
+      <span class="btn-text">✦ 创建代币</span>
+      <span class="spinner"></span>
+    </button>
+
+    <div id="progress-text" class="progress-text"></div>
+    <ul class="step-indicator">
+      <li>上传</li>
+      <li>余额</li>
+      <li>构建</li>
+      <li>签名</li>
+    </ul>
+
+    <div class="create-note">
+      每次创建收取 <strong>0.025 SOL</strong> 手续费 · 创建过程受链上网络环境影响，如果交易失败请重试
     </div>
 
-    <!-- 状态日志 -->
-    <div class="card">
-      <h2>📋 日志</h2>
-      <div id="status">准备就绪，连接钱包开始</div>
-    </div>
 
-    <!-- 结果 -->
-    <div id="result"></div>
+    <!-- ===== Result ===== -->
+    <div id="result" class="result-card"></div>
 
-    <div class="footer">
-      Created by sshzui · Powered by Solana Token-2022
+    <div class="footer">Powered by Solana Token-2022</div>
+  </main>
+
+  <!-- ===== Wallet Select Modal ===== -->
+  <div id="wallet-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <span>选择钱包</span>
+        <button id="modal-close-btn" class="modal-close">✕</button>
+      </div>
+      <div id="wallet-list"></div>
     </div>
   </div>
 
   <!-- Buffer polyfill -->
   <script src="buffer-polyfill.js"></script>
   <script src="https://unpkg.com/@solana/web3.js@1.98.0/lib/index.iife.js"></script>
-  <script src="bundle.js?v=4"></script>
+  <script src="bundle.js?v=5"></script>
 </body>
 </html>
